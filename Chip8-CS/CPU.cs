@@ -1,3 +1,5 @@
+using System.Data;
+
 namespace Chip8_CS;
 
 public class Cpu
@@ -47,5 +49,111 @@ public class Cpu
         // Reset Timers
         _delay_timer = 0;
         _sound_timer = 0;
+    }
+
+
+    /// <summary>
+    /// Emulates one cycle based on memory. Uses the fetch-decode-execute cycle,
+    /// as well as updating the timers.
+    /// </summary>
+    public void EmulateCycle()
+    {
+        var opcode = _memory.GetOpcode(_pc);
+
+        switch (opcode & 0xF000) // Get the first symbol of the code
+        {
+            case 0x0000:
+                switch (opcode & 0x000F)
+                {
+                    case 0x00E0:
+                        Array.Clear(_gfx, 0, _gfx.Length);
+                        break;
+                    case 0x00EE:
+                        if (_sp > 0)
+                        {
+                            _sp -= 1;
+                            _pc = _stack[_sp];
+                        }
+                        else
+                        {
+                            throw new StackOverflowException("Stack underflow error: No return address.");
+                        }
+
+                        break; 
+                    default:
+                        throw new ArgumentException($"Unknown opcode {opcode}");
+                }
+
+                break;
+            case 0xA000:
+                _i = (ushort)(opcode & 0x0FFF);
+                _pc += 2;
+                break;
+            case 0x2000:
+                // We need to do a temporary jump, thus we store the current 
+                // address of the pc.
+                _stack[_sp] = _pc; 
+                _sp += 1;
+                _pc = (ushort)(opcode & 0xFFF);
+                break;
+
+            case 0x8000:
+                var (x, y) = GetXyFromOpcode(opcode);
+                switch (opcode & 0x8000)
+                {   
+                    case 0x0000:
+                        _v[x] = _v[y];
+                        IncrementPC();
+                        break;
+                    case 0x0001:
+                        _v[x] = (byte)(_v[x] | _v[y]);
+                        IncrementPC();
+                        break;
+                    case 0x0002:
+                        _v[x] = (byte)(_v[x] & _v[y]);
+                        IncrementPC();
+                        break;
+                    case 0x0003:
+                        _v[x] = (byte)(_v[x] ^ _v[y]);
+                        IncrementPC();
+                        break;
+                    case 0x0004:
+                        int sum = _v[x] + _v[y];
+                        unchecked
+                        {
+                            _v[x] = (byte)sum;
+                        }
+                        _v[0xF] = (sum > 255) ? (byte)1 : (byte)0;
+                        IncrementPC();
+                        break;
+                }
+
+                break;
+            default:
+                throw new NotImplementedException($"The opcode {opcode} has not yet been implemented!");
+        }
+        
+        if (_delay_timer > 0)
+            _delay_timer -= 1;
+
+        if (_sound_timer > 0)
+        {
+            if (_sound_timer == 1)
+                Console.WriteLine("BEEP!");
+            _sound_timer -= 1;
+        }
+    }
+
+    private (int, int) GetXyFromOpcode(ushort opcode)
+    {
+        var x = (opcode & 0x0F00) >> 8;
+        var y = (opcode & 0x00F0) >> 4;
+
+        return (x, y);
+    }
+
+    private void IncrementPC()
+    {
+        _pc += 2;
     }
 }
