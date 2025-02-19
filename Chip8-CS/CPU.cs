@@ -24,4 +24,28 @@ public class Cpu
 
     // hex-based keypad (0x0-0xF). stores the current key state.
     private byte[] _key = new byte[16];
+
+    private Memory _memory;
+
+    /// <summary>
+    /// Initializes the registers and memory.
+    /// </summary>
+    public void Initialize()
+    {
+        _pc = 0x200; // Program counter starts at 0x200
+        _opcode = 0; // Reset the opcode
+        _i = 0; // Reset index
+        _sp = 0; // Reset stack pointer
+        
+        _memory.InitializeMemory();
+        _memory.LoadFontset();
+        // Clear stack
+        Array.Clear(_stack, 0, _stack.Length);
+        // Clear registers
+        Array.Clear(_v, 0, _v.Length);
+        
+        // Reset Timers
+        _delay_timer = 0;
+        _sound_timer = 0;
+    }
 }
