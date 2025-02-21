@@ -25,7 +25,7 @@ public class Memory
     };
     
 
-    public void InitializeMemory()
+    public Memory()
     {
         Array.Clear(MemoryArray, 0, MemoryArray.Length);
     }

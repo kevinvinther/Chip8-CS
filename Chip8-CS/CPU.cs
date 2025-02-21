@@ -31,19 +31,17 @@ public class Cpu
 
     private Memory _memory;
 
-    private Input _input;
-
     /// <summary>
     /// Initializes the registers and memory.
     /// </summary>
-    public void Initialize()
+    public Cpu()
     {
+        _memory = new Memory();
         _pc = 0x200; // Program counter starts at 0x200
         _opcode = 0; // Reset the opcode
         _i = 0; // Reset index
         _sp = 0; // Reset stack pointer
         
-        _memory.InitializeMemory();
         _memory.LoadFontset();
         // Clear stack
         Array.Clear(_stack, 0, _stack.Length);
@@ -240,7 +238,7 @@ public class Cpu
                         IncrementPC();
                         break;
                     case 0x000A:
-                        _v[x] = (byte)_input.GetKey();
+                        _v[x] = (byte)Input.GetKey();
                         break;
                     case 0x0015:
                         _delay_timer = _v[x];
