@@ -1,6 +1,6 @@
 namespace Chip8_CS;
 
-public class Input
+public static class Input
 {
     public enum Keys
     {
@@ -12,7 +12,7 @@ public class Input
     }
     
     
-    public Keys GetKey()
+    public static Keys GetKey()
     {   
         // TODO: Get key pressed
         throw new NotImplementedException();
