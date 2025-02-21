@@ -117,9 +117,10 @@ public class Cpu
                 IncrementPC();
                 break;
             case 0x8000:
+            {
                 var (x, y, _) = GetXyzFromOpcode(opcode);
                 switch (opcode & 0x0FFF)
-                {   
+                {
                     case 0x0000:
                         _v[x] = _v[y];
                         IncrementPC();
@@ -142,6 +143,7 @@ public class Cpu
                         {
                             _v[x] = (byte)sum;
                         }
+
                         _v[0xF] = (sum > 255) ? (byte)1 : (byte)0;
                         IncrementPC();
                         break;
@@ -161,6 +163,7 @@ public class Cpu
                         {
                             _v[x] = (byte)subSum;
                         }
+
                         _v[0xF] = (subSum < 0) ? (byte)0 : (byte)1;
                         IncrementPC();
                         break;
@@ -174,7 +177,9 @@ public class Cpu
                     default:
                         throw new ArgumentException($"Opcode doesn't exist. Opcode: {opcode:X}");
                 }
+
                 break;
+            }
             case 0xA000:
                 _i = (ushort)(opcode & 0x0FFF);
                 _pc += 2;
@@ -185,36 +190,63 @@ public class Cpu
             case 0xC000:
                 Random rng = new Random();
                 _v[opcode & 0x0F00] = (byte)(rng.Next(0, 256) & (opcode & 0x00FF));
+                IncrementPC();
                 break;
             case 0xD000:
                 throw new NotImplementedException();
             case 0xE000:
+            {
+                var (x, _, _) = GetXyzFromOpcode(opcode);
                 switch (opcode & 0x0FFF)
-                {   
+                {
                     case 0x009E:
                         throw new NotImplementedException();
                     case 0x00A1:
                         throw new NotImplementedException();
                     case 0x0007:
-                        throw new NotImplementedException();
+                        _v[x] = _delay_timer;
+                        IncrementPC();
+                        break;
                     case 0x000A:
                         throw new NotImplementedException();
                     case 0x0015:
-                        throw new NotImplementedException();
+                        _delay_timer = _v[x];
+                        IncrementPC();
+                        break;
                     case 0x0018:
-                        throw new NotImplementedException();
+                        _sound_timer = _v[x];
+                        IncrementPC();
+                        break;
                     case 0x001E:
-                        throw new NotImplementedException();
+                        _i += _v[x];
+                        IncrementPC();
+                        break;
                     case 0x0029:
                         throw new NotImplementedException();
                     case 0x0033:
-                        throw new NotImplementedException();
+                        _memory.MemoryArray[_i] = (byte)(_v[x] / 100);
+                        _memory.MemoryArray[_i+1] = (byte)((_v[x] / 10) % 10);
+                        _memory.MemoryArray[_i+2] = (byte)((_v[x] % 100) % 10);
+                        IncrementPC();
+                        break;
                     case 0x0055:
-                        throw new NotImplementedException();
+                        for (int y = 0; y <= x; y++)
+                        {
+                            _memory.MemoryArray[_i+y] = _v[y];
+                        }
+                        IncrementPC();
+                        break;
                     case 0x0065:
-                        throw new NotImplementedException();
+                        for (int y = 0; y <= x; y++)
+                        {
+                            _v[y] = _memory.MemoryArray[_i+y];
+                        }
+                        IncrementPC();
+                        break;
                 }
+
                 break;
+            }
             default:
                 throw new NotImplementedException($"The opcode {opcode:X} has not yet been implemented!");
         }
