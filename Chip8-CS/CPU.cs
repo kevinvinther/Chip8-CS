@@ -118,7 +118,7 @@ public class Cpu
                 break;
             case 0x8000:
                 var (x, y, _) = GetXyzFromOpcode(opcode);
-                switch (opcode & 0x8000)
+                switch (opcode & 0x0FFF)
                 {   
                     case 0x0000:
                         _v[x] = _v[y];
