@@ -126,6 +126,32 @@ public class Cpu
                         _v[0xF] = (sum > 255) ? (byte)1 : (byte)0;
                         IncrementPC();
                         break;
+                    case 0x0005:
+                        _v[0xF] = (_v[x] >= _v[y]) ? (byte)1 : (byte)0;
+                        _v[x] = (byte)(_v[x] - _v[y]);
+                        IncrementPC();
+                        break;
+                    case 0x0006:
+                        _v[0xF] = (byte)(_v[x] & 0x1);
+                        _v[x] >>= 1;
+                        IncrementPC();
+                        break;
+                    case 0x0007:
+                        int subSum = _v[x] - _v[y];
+                        unchecked
+                        {
+                            _v[x] = (byte)subSum;
+                        }
+                        _v[0xF] = (subSum < 0) ? (byte)0 : (byte)1;
+                        IncrementPC();
+                        break;
+                    case 0x000E:
+                        // 0x80 is the most significant bit
+                        // we bitshift it by 7 to make it the least significant, and therefore store just the bit in v[F]
+                        _v[0xF] = (byte)((_v[x] & 0x80) >> 7);
+                        _v[x] <<= 1;
+                        IncrementPC();
+                        break;
                 }
 
                 break;
