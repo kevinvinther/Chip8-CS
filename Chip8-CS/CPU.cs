@@ -295,8 +295,8 @@ public class Cpu
         return (x, y, z);
     }
 
-    private void IncrementPC()
+    private void IncrementPC(ushort amount = 2)
     {
-        _pc += 2;
+        _pc += amount;
     }
 }
