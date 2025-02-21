@@ -85,10 +85,6 @@ public class Cpu
                 }
 
                 break;
-            case 0xA000:
-                _i = (ushort)(opcode & 0x0FFF);
-                _pc += 2;
-                break;
             case 0x2000:
                 // We need to do a temporary jump, thus we store the current 
                 // address of the pc.
@@ -153,7 +149,10 @@ public class Cpu
                         IncrementPC();
                         break;
                 }
-
+                break;
+            case 0xA000:
+                _i = (ushort)(opcode & 0x0FFF);
+                _pc += 2;
                 break;
             default:
                 throw new NotImplementedException($"The opcode {opcode} has not yet been implemented!");
