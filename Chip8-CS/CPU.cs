@@ -31,6 +31,8 @@ public class Cpu
 
     private Memory _memory;
 
+    private Input _input;
+
     /// <summary>
     /// Initializes the registers and memory.
     /// </summary>
@@ -176,8 +178,6 @@ public class Cpu
                         _v[x] <<= 1;
                         IncrementPC();
                         break;
-                    default:
-                        throw new ArgumentException($"Opcode doesn't exist. Opcode: {opcode:X}");
                 }
 
                 break;
@@ -224,15 +224,24 @@ public class Cpu
                 switch (opcode & 0x0FFF)
                 {
                     case 0x009E:
-                        throw new NotImplementedException();
+                        if(_key[_v[x]] != 0)
+                            IncrementPC();
+                        else
+                            IncrementPC(4);
+                        break;
                     case 0x00A1:
-                        throw new NotImplementedException();
+                        if(_key[_v[x]] == 0)
+                            IncrementPC();
+                        else
+                            IncrementPC(4);
+                        break;
                     case 0x0007:
                         _v[x] = _delay_timer;
                         IncrementPC();
                         break;
                     case 0x000A:
-                        throw new NotImplementedException();
+                        _v[x] = (byte)_input.GetKey();
+                        break;
                     case 0x0015:
                         _delay_timer = _v[x];
                         IncrementPC();
@@ -246,7 +255,9 @@ public class Cpu
                         IncrementPC();
                         break;
                     case 0x0029:
-                        throw new NotImplementedException();
+                        // each sprite takes up 5 bytes. thus sprite 0 = 0..5, 1 = 5..10 etc.
+                        _i = (ushort)(_v[x] * 0x5);
+                        break;
                     case 0x0033:
                         _memory.MemoryArray[_i] = (byte)(_v[x] / 100);
                         _memory.MemoryArray[_i+1] = (byte)((_v[x] / 10) % 10);
