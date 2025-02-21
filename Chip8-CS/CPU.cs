@@ -27,6 +27,8 @@ public class Cpu
     // hex-based keypad (0x0-0xF). stores the current key state.
     private byte[] _key = new byte[16];
 
+    private bool _drawFlag;
+
     private Memory _memory;
 
     /// <summary>
@@ -193,7 +195,29 @@ public class Cpu
                 IncrementPC();
                 break;
             case 0xD000:
-                throw new NotImplementedException();
+            {
+                var (x, y, height) = GetXyzFromOpcode(opcode);
+
+                _v[0xF] = 0;
+                for (var yline = 0; yline < height; yline++)
+                {
+                    ushort pixel = _memory.MemoryArray[_i + yline];
+                    // the width is hardcoded to be 8.
+                    for (var xline = 0; xline < 8; xline++)
+                    {
+                        if ((pixel & (0x80 >> xline)) != 0)
+                        {
+                            if (_gfx[(x + xline + ((y + yline) * 64))] == 1)
+                                _v[0xF] = 1;
+                            _gfx[x + xline + ((y + yline) * 64)] ^= 1;
+                        }
+                    }
+                }
+                _drawFlag = true;
+                IncrementPC();
+                break;
+
+            }
             case 0xE000:
             {
                 var (x, _, _) = GetXyzFromOpcode(opcode);
