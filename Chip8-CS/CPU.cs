@@ -67,6 +67,7 @@ public class Cpu
                 {
                     case 0x00E0:
                         Array.Clear(_gfx, 0, _gfx.Length);
+                        IncrementPC();
                         break;
                     case 0x00EE:
                         if (_sp > 0)
@@ -86,7 +87,8 @@ public class Cpu
 
                 break;
             case 0x1000:
-                
+                _pc = (ushort)(opcode & 0x0FFF);
+                break;
             case 0x2000:
                 // We need to do a temporary jump, thus we store the current 
                 // address of the pc.
@@ -94,7 +96,26 @@ public class Cpu
                 _sp += 1;
                 _pc = (ushort)(opcode & 0xFFF);
                 break;
-
+            case 0x3000:
+                if (_v[opcode & 0x0F00] == (opcode & 0x00FF))
+                    IncrementPC();
+                break;
+            case 0x4000:
+                if (_v[opcode & 0x0F00] != (opcode & 0x00FF))
+                    IncrementPC();
+                break;
+            case 0x5000:
+                if (_v[opcode & 0x0F00] == _v[opcode & 0x00F0])
+                    IncrementPC();
+                break;
+            case 0x6000:
+                _v[opcode & 0x0F00] = (byte)(opcode & 0x00FF);
+                IncrementPC();
+                break;
+            case 0x7000:
+                _v[opcode & 0x0F00] += (byte)(opcode & 0x00FF);
+                IncrementPC();
+                break;
             case 0x8000:
                 var (x, y, _) = GetXyzFromOpcode(opcode);
                 switch (opcode & 0x8000)
@@ -150,14 +171,23 @@ public class Cpu
                         _v[x] <<= 1;
                         IncrementPC();
                         break;
+                    default:
+                        throw new ArgumentException($"Opcode doesn't exist. Opcode: {opcode:X}");
                 }
                 break;
             case 0xA000:
                 _i = (ushort)(opcode & 0x0FFF);
                 _pc += 2;
                 break;
+            case 0xB000:
+                _pc = (ushort)(_v[0x0] + (opcode & 0x0FFF));
+                break;
+            case 0xC000:
+                Random rng = new Random();
+                _v[opcode & 0x0F00] = (byte)(rng.Next(0, 256) & (opcode & 0x00FF));
+                break;
             default:
-                throw new NotImplementedException($"The opcode {opcode} has not yet been implemented!");
+                throw new NotImplementedException($"The opcode {opcode:X} has not yet been implemented!");
         }
         
         if (_delay_timer > 0)
