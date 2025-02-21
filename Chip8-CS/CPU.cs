@@ -186,6 +186,35 @@ public class Cpu
                 Random rng = new Random();
                 _v[opcode & 0x0F00] = (byte)(rng.Next(0, 256) & (opcode & 0x00FF));
                 break;
+            case 0xD000:
+                throw new NotImplementedException();
+            case 0xE000:
+                switch (opcode & 0x0FFF)
+                {   
+                    case 0x009E:
+                        throw new NotImplementedException();
+                    case 0x00A1:
+                        throw new NotImplementedException();
+                    case 0x0007:
+                        throw new NotImplementedException();
+                    case 0x000A:
+                        throw new NotImplementedException();
+                    case 0x0015:
+                        throw new NotImplementedException();
+                    case 0x0018:
+                        throw new NotImplementedException();
+                    case 0x001E:
+                        throw new NotImplementedException();
+                    case 0x0029:
+                        throw new NotImplementedException();
+                    case 0x0033:
+                        throw new NotImplementedException();
+                    case 0x0055:
+                        throw new NotImplementedException();
+                    case 0x0065:
+                        throw new NotImplementedException();
+                }
+                break;
             default:
                 throw new NotImplementedException($"The opcode {opcode:X} has not yet been implemented!");
         }
