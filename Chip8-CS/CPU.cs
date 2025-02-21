@@ -85,6 +85,8 @@ public class Cpu
                 }
 
                 break;
+            case 0x1000:
+                
             case 0x2000:
                 // We need to do a temporary jump, thus we store the current 
                 // address of the pc.
@@ -94,7 +96,7 @@ public class Cpu
                 break;
 
             case 0x8000:
-                var (x, y) = GetXyFromOpcode(opcode);
+                var (x, y, _) = GetXyzFromOpcode(opcode);
                 switch (opcode & 0x8000)
                 {   
                     case 0x0000:
@@ -169,12 +171,13 @@ public class Cpu
         }
     }
 
-    private (int, int) GetXyFromOpcode(ushort opcode)
+    private (int, int, int) GetXyzFromOpcode(ushort opcode)
     {
         var x = (opcode & 0x0F00) >> 8;
         var y = (opcode & 0x00F0) >> 4;
+        var z = (opcode & 0x000F);
 
-        return (x, y);
+        return (x, y, z);
     }
 
     private void IncrementPC()
